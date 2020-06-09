@@ -42,10 +42,10 @@ def transition_to_slot_via_block(spec, state, slot):
 
 def transition_to_valid_shard_slot(spec, state):
     """
-    Transition to slot `spec.PHASE_1_GENESIS_SLOT + 1` and fork at `spec.PHASE_1_GENESIS_SLOT`.
+    Mock genesis slot as ``Slot(0)``.
     """
-    transition_to(spec, state, spec.PHASE_1_GENESIS_SLOT)
-    state = spec.upgrade_to_phase1(state)  # `upgrade_to_phase1` is a pure function
+    spec.PHASE_1_GENESIS_SLOT = spec.Slot(0)
+    state = spec.upgrade_to_phase1(state)
     next_slot(spec, state)
     return state
 

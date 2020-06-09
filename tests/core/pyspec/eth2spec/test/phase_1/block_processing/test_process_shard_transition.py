@@ -31,7 +31,7 @@ def run_basic_crosslink_tests(spec, state, target_len_offset_slot, valid=True):
     shard_transitions = get_shard_transitions(
         spec,
         state,
-        shard_blocks={shard: shard_blocks},
+        shard_block_dict={shard: shard_blocks},
     )
     shard_transition = shard_transitions[shard]
     attestation = get_valid_on_time_attestation(

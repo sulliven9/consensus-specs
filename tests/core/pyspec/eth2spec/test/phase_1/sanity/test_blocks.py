@@ -1,5 +1,4 @@
-from typing import Dict, Sequence
-
+from eth2spec.phase1 import spec as phase1_spec
 from eth2spec.test.context import (
     PHASE0,
     with_all_phases_except,
@@ -12,6 +11,9 @@ from eth2spec.test.helpers.shard_block import (
     get_shard_transitions,
 )
 from eth2spec.test.helpers.state import state_transition_and_sign_block, transition_to_valid_shard_slot, transition_to
+
+
+sample_shard_block_body = b'\x56' * phase1_spec.MAX_SHARD_BLOCK_SIZE
 
 
 def run_beacon_block_with_shard_blocks(spec, state, target_len_offset_slot, committee_index,
@@ -60,7 +62,7 @@ def run_beacon_block_with_shard_blocks(spec, state, target_len_offset_slot, comm
 
 @with_all_phases_except([PHASE0])
 @spec_state_test
-def test_process_beacon_block_with_normal_shard_transition(spec, state):
+def test_process_beacon_block_of_1_valid(spec, state):
     # NOTE: this test is only for full crosslink (minimal config), not for mainnet
     state = transition_to_valid_shard_slot(spec, state)
 
@@ -71,16 +73,36 @@ def test_process_beacon_block_with_normal_shard_transition(spec, state):
 
     transition_to(spec, state, state.slot + target_len_offset_slot)
 
-    body = b'\x56' * spec.MAX_SHARD_BLOCK_SIZE
-    shard_block = build_shard_block(spec, state, shard, body=body, slot=state.slot, signed=True)
+    shard_block = build_shard_block(spec, state, shard, body=sample_shard_block_body, slot=state.slot, signed=True)
     shard_block_dict = {shard: [shard_block]}
 
-    yield from run_beacon_block_with_shard_blocks(spec, state, target_len_offset_slot, committee_index, shard, shard_block_dict)
+    yield from run_beacon_block_with_shard_blocks(spec, state, target_len_offset_slot,
+                                                  committee_index, shard, shard_block_dict)
 
 
 @with_all_phases_except([PHASE0])
 @spec_state_test
-def test_process_beacon_block_with_empty_proposal_transition(spec, state):
+def test_process_beacon_block_of_1_skipped_1_valid(spec, state):
+    # NOTE: this test is only for full crosslink (minimal config), not for mainnet
+    state = transition_to_valid_shard_slot(spec, state)
+
+    target_len_offset_slot = 2
+    committee_index = spec.CommitteeIndex(0)
+    shard = spec.compute_shard_from_committee_index(state, committee_index, state.slot + target_len_offset_slot - 1)
+    assert state.shard_states[shard].slot == state.slot - 1
+
+    transition_to(spec, state, state.slot + target_len_offset_slot)
+
+    shard_block = build_shard_block(spec, state, shard, body=sample_shard_block_body, slot=state.slot, signed=True)
+    shard_block_dict = {shard: [shard_block]}
+
+    yield from run_beacon_block_with_shard_blocks(spec, state, target_len_offset_slot,
+                                                  committee_index, shard, shard_block_dict)
+
+
+@with_all_phases_except([PHASE0])
+@spec_state_test
+def test_process_beacon_block_with_1_skipped(spec, state):
     # NOTE: this test is only for full crosslink (minimal config), not for mainnet
     state = transition_to_valid_shard_slot(spec, state)
 
@@ -92,4 +114,23 @@ def test_process_beacon_block_with_empty_proposal_transition(spec, state):
     transition_to(spec, state, state.slot + target_len_offset_slot)
     shard_block_dict = {}
 
-    yield from run_beacon_block_with_shard_blocks(spec, state, target_len_offset_slot, committee_index, shard, shard_block_dict)
+    yield from run_beacon_block_with_shard_blocks(spec, state, target_len_offset_slot,
+                                                  committee_index, shard, shard_block_dict)
+
+
+@with_all_phases_except([PHASE0])
+@spec_state_test
+def test_process_beacon_block_of_2_skipped(spec, state):
+    # NOTE: this test is only for full crosslink (minimal config), not for mainnet
+    state = transition_to_valid_shard_slot(spec, state)
+
+    target_len_offset_slot = 2
+    committee_index = spec.CommitteeIndex(0)
+    shard = spec.compute_shard_from_committee_index(state, committee_index, state.slot + target_len_offset_slot - 1)
+    assert state.shard_states[shard].slot == state.slot - 1
+
+    transition_to(spec, state, state.slot + target_len_offset_slot)
+    shard_block_dict = {}
+
+    yield from run_beacon_block_with_shard_blocks(spec, state, target_len_offset_slot,
+                                                  committee_index, shard, shard_block_dict)
