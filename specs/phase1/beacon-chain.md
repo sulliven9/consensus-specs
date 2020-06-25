@@ -581,7 +581,7 @@ def get_shard_proposer_index(beacon_state: BeaconState, slot: Slot, shard: Shard
     """
     epoch = compute_epoch_at_slot(slot)
     committee = get_shard_committee(beacon_state, epoch, shard)
-    seed = hash(get_seed(beacon_state, epoch, DOMAIN_SHARD_COMMITTEE) + int_to_bytes(slot))
+    seed = hash(get_seed(beacon_state, epoch, DOMAIN_SHARD_COMMITTEE) + uint_to_bytes(slot))
     r = bytes_to_uint64(seed[:8])
     return committee[r % len(committee)]
 ```
