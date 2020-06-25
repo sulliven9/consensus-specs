@@ -56,7 +56,7 @@
     - [`integer_squareroot`](#integer_squareroot)
     - [`xor`](#xor)
     - [`int_to_bytes`](#int_to_bytes)
-    - [`bytes_to_int`](#bytes_to_int)
+    - [`bytes_to_uint64`](#bytes_to_uint64)
   - [Crypto](#crypto)
     - [`hash`](#hash)
     - [`hash_tree_root`](#hash_tree_root)
@@ -588,10 +588,10 @@ def int_to_bytes(n: uint) -> bytes:
     return n.encode_bytes(byteorder=ENDIANNESS)
 ```
 
-#### `bytes_to_int`
+#### `bytes_to_uint64`
 
 ```python
-def bytes_to_int(data: bytes) -> uint64:
+def bytes_to_uint64(data: bytes) -> uint64:
     """
     Return the integer deserialization of ``data`` interpreted as ``ENDIANNESS``-endian.
     """
@@ -735,7 +735,7 @@ def compute_shuffled_index(index: uint64, index_count: uint64, seed: Bytes32) ->
     # Swap or not (https://link.springer.com/content/pdf/10.1007%2F978-3-642-32009-5_1.pdf)
     # See the 'generalized domain' algorithm on page 3
     for current_round in map(uint8, range(SHUFFLE_ROUND_COUNT)):
-        pivot = bytes_to_int(hash(seed + int_to_bytes(current_round))[0:8]) % index_count
+        pivot = bytes_to_uint64(hash(seed + int_to_bytes(current_round))[0:8]) % index_count
         flip = uint64((pivot + index_count - index) % index_count)
         position = max(index, flip)
         source = hash(
