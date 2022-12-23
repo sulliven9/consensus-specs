@@ -796,7 +796,8 @@ def compute_proposer_index(state: BeaconState, indices: Sequence[ValidatorIndex]
         candidate_index = indices[compute_shuffled_index(i % total, total, seed)]
         random_byte = hash(seed + uint_to_bytes(uint64(i // 32)))[i % 32]
         effective_balance = state.validators[candidate_index].effective_balance
-        if effective_balance * MAX_RANDOM_BYTE >= MAX_EFFECTIVE_BALANCE * random_byte:
+        slashed = state.validators[candidate_index].slashed
+        if effective_balance * MAX_RANDOM_BYTE >= MAX_EFFECTIVE_BALANCE * random_byte and not slashed:
             return candidate_index
         i += 1
 ```
