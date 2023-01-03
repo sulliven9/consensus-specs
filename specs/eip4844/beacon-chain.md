@@ -227,6 +227,26 @@ def verify_kzg_commitments_against_transactions(transactions: Sequence[Transacti
 
 ## Beacon chain state transition function
 
+### Epoch processing
+
+*Note*: During testing we avoid Capella-specific updates to the state transition. We change `process_historical_summaries_update` back to `process_historical_roots_update` for now.
+
+```python
+def process_epoch(state: BeaconState) -> None:
+    process_justification_and_finalization(state)
+    process_inactivity_updates(state)
+    process_rewards_and_penalties(state)
+    process_registry_updates(state)
+    process_slashings(state)
+    process_eth1_data_reset(state)
+    process_effective_balance_updates(state)
+    process_slashings_reset(state)
+    process_randao_mixes_reset(state)
+    process_historical_roots_update(state)  # Tempararily disable Capella change
+    process_participation_flag_updates(state)
+    process_sync_committee_updates(state)
+```
+
 ### Block processing
 
 ```python
